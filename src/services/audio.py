@@ -1,5 +1,3 @@
-import os
-from dotenv import load_dotenv
 import speech_recognition as sr
 from groq import Groq
 from typing import Any
@@ -7,14 +5,10 @@ import edge_tts as et
 import pygame
 import time
 from pygame import mixer
-
-# --- CONFIGURAÇÃO ---
-# Cola a tua chave aqui dentro das aspas OU define uma variável de ambiente
-load_dotenv()
-api_key = os.getenv("GROQ_API_KEY")
+from config.config import config
 
 # Inicializa o cliente Groq
-client = Groq(api_key=api_key)
+client = Groq(api_key=config.GROQ_API_KEY)
 
 def gravar_audio():
     # Inicializa o reconhecedor de microfone
@@ -33,7 +27,7 @@ def gravar_audio():
         
         try:
             # 1. Captura o áudio (com limite de tempo para não travar)
-            audio = recognizer.listen(source, timeout=5, phrase_time_limit=30)
+            audio = recognizer.listen(source, timeout=1, phrase_time_limit=30)
             audio_data = audio.get_wav_data()
             arquivo_memoria = ("audio.wav", audio_data)
 
