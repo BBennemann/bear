@@ -16,18 +16,18 @@ def gravar_audio():
 
     # Ajustes para detetar quando paras de falar mais rápido
     recognizer.energy_threshold = 300  # Sensibilidade
-    recognizer.pause_threshold = 0.8   # Segundos de silêncio para considerar fim da frase
+    recognizer.pause_threshold = 1.5   # Segundos de silêncio para considerar fim da frase
     recognizer.dynamic_energy_threshold = True
 
-    with sr.Microphone(device_index=5) as source:
+    with sr.Microphone() as source:
         print("\n--- A escutar... (Fala agora) ---")
         
         # Ajusta o ruído de fundo (apenas 0.5s para ser rápido)
-        recognizer.adjust_for_ambient_noise(source, duration=0.5)
+        recognizer.adjust_for_ambient_noise(source, duration=1)
         
         try:
             # 1. Captura o áudio (com limite de tempo para não travar)
-            audio = recognizer.listen(source, timeout=1, phrase_time_limit=30)
+            audio = recognizer.listen(source)
             audio_data = audio.get_wav_data()
             arquivo_memoria = ("audio.wav", audio_data)
 
