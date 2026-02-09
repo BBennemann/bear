@@ -1,51 +1,60 @@
-from services.audio import gravar_audio, transcrever, tocar_audio
+from services.audio import AudioService
 from services.gemini import enviar_pergunta
 import asyncio
 from pvrecorder import PvRecorder
 import pvporcupine
 from config.config import config
-import os
+from pathlib import Path
 
-def main():
+async def main():
+    current_dir = Path(__file__).parent # Pega o caminho do arquivo atual
+    model_path = current_dir / 'models' / 'bear_porcupine.ppn' # Constrói o caminho absoluto
+
+    audio_service = AudioService()
+
     porcupine = pvporcupine.create(
         access_key=config.PICOVOICE_API_KEY,
-        keyword_paths=["src/models/bear_porcupine.ppn"]
+        keyword_paths=[model_path]
     )
-
-    recorder = PvRecorder(frame_length=porcupine.frame_length)
 
     print("Bear está ouvindo...")
 
     try:
-        recorder.start()
-
         while True:
-            pcm = recorder.read()
+            # Cria o gravador apenas para esse ciclo de "espera"
+            recorder = PvRecorder(frame_length=porcupine.frame_length)
+            recorder.start()
             
-            keyword_index = porcupine.process(pcm)
-            
-            if keyword_index >= 0:
-                print("Bear acordou!")
+            # Loop de detecção da Wake Word
+            while True:
+                pcm = recorder.read()
+                keyword_index = porcupine.process(pcm)
                 
-                recorder.stop()
+                if keyword_index >= 0:
+                    print("Bear acordou!")
+                    break # Sai do loop de espera
+            
+            # Libera o microfone COMPLETAMENTE para o outro processo usar
+            recorder.stop()
+            recorder.delete()
 
-                audio = gravar_audio()
-                if audio:
-
-                    texto = transcrever(audio)
-                    print("--- Transcrito: ---", texto)
-                    if texto:
-                        resposta = enviar_pergunta(texto)
-                        asyncio.run(tocar_audio(resposta))
-
-                recorder.start()
-
+            # --- Lógica de Comando ---
+            audio = audio_service.gravar_audio()
+            
+            if audio:
+                texto = audio_service.transcrever(audio)
+                print("--- Transcrito: ---", texto)
+                if texto:
+                    resposta = enviar_pergunta(texto)
+                    asyncio.run(audio_service.tocar_audio(resposta))
+            
+            # O loop reinicia e recria o recorder lá em cima
+            
     except Exception as e:
         print(f"Erro: {e}")
     finally:
-        recorder.stop()
-        recorder.delete()
-        porcupine.delete()
+        if 'porcupine' in locals():
+            porcupine.delete()
 
 if __name__ == '__main__':
     main()
