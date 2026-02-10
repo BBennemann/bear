@@ -1,4 +1,5 @@
 .venv/
 .env
-audio.mp3
+*.mp3
 __pycache__
+*ppn
