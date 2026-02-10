@@ -1,16 +1,14 @@
-from services.audio import AudioService
-from services.gemini import enviar_pergunta
+from core.audio import AudioService
+from core.llm import LLMFactory
 import asyncio
 from pvrecorder import PvRecorder
 import pvporcupine
 from config.config import config
 from pathlib import Path
 
-async def main():
+async def main(llm_service, audio_service):
     current_dir = Path(__file__).parent # Pega o caminho do arquivo atual
     model_path = current_dir / 'models' / 'bear_porcupine.ppn' # Constrói o caminho absoluto
-
-    audio_service = AudioService()
 
     porcupine = pvporcupine.create(
         access_key=config.PICOVOICE_API_KEY,
@@ -45,8 +43,8 @@ async def main():
                 texto = audio_service.transcrever(audio)
                 print("--- Transcrito: ---", texto)
                 if texto:
-                    resposta = enviar_pergunta(texto)
-                    asyncio.run(audio_service.tocar_audio(resposta))
+                    resposta = llm_service.enviar_pergunta(texto)
+                    await audio_service.tocar_audio(resposta)
             
             # O loop reinicia e recria o recorder lá em cima
             
@@ -57,4 +55,6 @@ async def main():
             porcupine.delete()
 
 if __name__ == '__main__':
-    main()
+    llm_service = LLMFactory.get_llm_service(config.LLM_PROVIDER)
+    audio_service = AudioService()
+    asyncio.run(main(llm_service, audio_service))
