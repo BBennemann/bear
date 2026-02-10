@@ -19,16 +19,14 @@ class AudioService():
 
         self._verificar_dependencias()
 
-
     def _verificar_dependencias(self):
         self.mpv_path = shutil.which("mpv")
         if not self.mpv_path:
             raise RuntimeError("MPV player não encontrado. Instale com 'sudo apt install mpv'")
 
-
     def _config_recognizer(self):
         self.recognizer.energy_threshold = 300
-        self.recognizer.pause_threshold = 0.6
+        self.recognizer.pause_threshold = 1.5
         self.recognizer.dynamic_energy_threshold = True
 
     def gravar_audio(self):
