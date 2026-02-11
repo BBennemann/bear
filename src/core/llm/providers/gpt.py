@@ -1,11 +1,16 @@
-from openai import OpenAI
 from config.config import config
 from ..interface import ILLMService
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
 
 class GPTService(ILLMService):
 
     def __init__(self):
-        self.client = OpenAI(api_key=config.OPENAI_API_KEY)
+        self.model = ChatOpenAI(
+            model="gpt-4o-mini",
+            api_key=config.OPENAI_API_KEY,
+            temperature=0.5
+        )
 
     def enviar_pergunta(self, pergunta: str) -> str:
         instrucao_sistema = (
@@ -18,13 +23,11 @@ class GPTService(ILLMService):
             "Fale apenas texto puro em português."
         )
 
-        response = self.client.chat.completions.create(
-            model="gpt-4o-mini", # Ou gpt-3.5-turbo, gpt-4
-            messages=[
-                {"role": "system", "content": instrucao_sistema},
-                {"role": "user", "content": pergunta}
-            ],
-            temperature=0.5
-        )
+        messages = [
+            SystemMessage(content=instrucao_sistema),
+            HumanMessage(content=pergunta)
+        ]
 
-        return response.choices[0].message.content
+        response = self.model.invoke(messages)
+
+        return response.content

@@ -1,17 +1,21 @@
-from google import genai
-from google.genai import types
 from config.config import config
 from ..interface import ILLMService
-
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import SystemMessage, HumanMessage
+from langgraph.prebuilt import create_react_agent
+from core.tools import TOOLS
 
 class GeminiService(ILLMService):
 
     def __init__(self):
-        self.client = genai.Client(api_key=config.GEMINI_API_KEY)
+        self.model = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            google_api_key=config.GEMINI_API_KEY,
+            temperature=0.5,
+        )
+        self.tools = TOOLS
 
-    def enviar_pergunta(self, pergunta: str) -> str:
-
-        instrucao_sistema = (
+        self.instrucao_sistema = (
             "Você é o B.E.A.R. (Bernardo's Electronic Assistant Robot), "
             "um assistente pessoal criado pelo Bernardo. "
             "O seu apelido é Be ou B."
@@ -21,13 +25,13 @@ class GeminiService(ILLMService):
             "Fale apenas texto puro em português."
         )
 
-        response = self.client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=pergunta,
-            config=types.GenerateContentConfig(
-                system_instruction=instrucao_sistema,
-                temperature=0.5
-            )
+        self.agent = create_react_agent(
+            model=self.model,
+            tools=self.tools,
+            prompt=self.instrucao_sistema
         )
 
-        return response.text
+    def enviar_pergunta(self, pergunta: str) -> str:
+        response = self.agent.invoke({"messages": [("user", pergunta)]})
+
+        return response["messages"][-1].content
