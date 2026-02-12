@@ -1,3 +1,3 @@
-from .basic import piada
+from .tools import piada
 
 TOOLS = [piada]
