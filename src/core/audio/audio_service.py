@@ -26,7 +26,7 @@ class AudioService():
 
     def _config_recognizer(self):
         self.recognizer.energy_threshold = 300
-        self.recognizer.pause_threshold = 1.5
+        self.recognizer.pause_threshold = 1.0
         self.recognizer.dynamic_energy_threshold = True
 
     def gravar_audio(self):
