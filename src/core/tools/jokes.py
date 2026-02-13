@@ -14,14 +14,7 @@ def piada() -> str:
         "Por que os fantasmas são péssimos para contar mentiras?... Porque são transparentes.",
         "Por que a plantinha não foi atendida no hospital?... Porque só tinha médico de plantão."
     ]
-    return random.choice(jokes_list)
+    return {"joke":random.choice(jokes_list)}
 
-def daily_briefing() -> str:
-    """
-    Retorna um resumo das notícias do dia.
 
-    Returns:
-        str: O resumo das notícias do dia.
-    """
-    return ""
     

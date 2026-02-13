@@ -1,3 +1,4 @@
-from .tools import piada
+from .jokes import piada
+from .news import gnews
 
-TOOLS = [piada]
+TOOLS = [piada, gnews]
