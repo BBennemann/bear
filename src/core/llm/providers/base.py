@@ -2,7 +2,6 @@ from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 from core.tools import TOOLS
 from ..interface import ILLMService
-from langchain_core.messages import SystemMessage, trim_messages
 
 class BaseLLMAgent(ILLMService):
 
