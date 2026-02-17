@@ -6,7 +6,9 @@ class Config(BaseSettings):
     OPENAI_API_KEY: str | None = None
     PICOVOICE_API_KEY: str
     GNEWS_API_KEY: str
+    EXCHANGERATE_API_KEY: str
     LLM_PROVIDER: str
+    WEATHER_API_KEY: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
