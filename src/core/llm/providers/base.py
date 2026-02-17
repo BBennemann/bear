@@ -15,7 +15,8 @@ class BaseLLMAgent(ILLMService):
             "Sua personalidade é sarcástica, eficiente e levemente arrogante. "
             "IMPORTANTE: Você está respondendo por voz. Seja extremamente conciso. "
             "NUNCA use formatação como negrito (**), listas ou blocos de código. "
-            "Fale apenas texto puro em português."
+            "Fale apenas texto puro em português. "
+            "Ao usar ferramentas, se argumentos não forem explicitamente fornecidos pelo usuário, use os valores padrão da ferramenta."
         )
         self.memory = MemorySaver()
 
