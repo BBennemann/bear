@@ -1,10 +1,16 @@
 import json
 import requests
-from config.config import config
+import sys
+import os
+from typing import Optional
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
+from src.config.config import config
 from langchain_core.tools import tool
 
 @tool
-def gnews(category: str = "technology", lang: str = "pt", country: str = "br", max: int = 3) -> str:
+def gnews(category: str = "general", lang: str = "en", country: str = "ie", max: Optional[int] = 3) -> str:
     """
     Busca as principais manchetes de notícias através da API do GNews.
 
@@ -15,11 +21,13 @@ def gnews(category: str = "technology", lang: str = "pt", country: str = "br", m
         category (str): Categoria das notícias. Opções disponíveis: 'general', 'world', 
             'nation', 'business', 'technology', 'entertainment', 'sports', 'science' 
             e 'health'. Valor padrão: "technology".
-        lang (str): Idioma dos artigos no formato ISO 639-1 (2 letras). 
+        lang (str): Idioma dos artigos no formato ISO 639-1 (2 letras).
+            Deve sempre corresponder à língua principal do país da notícia.
+            Assuma automaticamente qual é a lingua
             Ex: 'pt', 'en', 'es'. Valor padrão: "pt".
         country (str): Código do país no formato ISO 3166-1 alpha-2 (2 letras). 
             Define a origem ou relevância geográfica das notícias. Valor padrão: "br".
-        max (int): Número máximo de artigos a serem retornados. Aceita valores 
+        max (optional, int): Número máximo de artigos a serem retornados. Aceita valores 
             entre 1 e 100 (sujeito aos limites do plano da API). Valor padrão: 3.
 
     Returns:
@@ -57,12 +65,5 @@ def gnews(category: str = "technology", lang: str = "pt", country: str = "br", m
     
     return {"articles": conteudo_limpo}
 
-
-def daily_briefing() -> str:
-    """
-    Retorna um resumo das notícias do dia.
-
-    Returns:
-        str: O resumo das notícias do dia.
-    """
-    return ""
+if __name__ == "__main__":
+    print(gnews.invoke({}))
