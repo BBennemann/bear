@@ -4,7 +4,6 @@ class Config(BaseSettings):
     GROQ_API_KEY: str
     GEMINI_API_KEY: str 
     OPENAI_API_KEY: str | None = None
-    PICOVOICE_API_KEY: str
     GNEWS_API_KEY: str
     EXCHANGERATE_API_KEY: str
     LLM_PROVIDER: str
