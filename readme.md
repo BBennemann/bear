@@ -64,5 +64,5 @@ GEMINI_API_KEY=your_key_here
 **To use GPT:**
 ```ini
 LLM_PROVIDER=openai
-OPENAI_API_KEY=sua_chave_aqui
+OPENAI_API_KEY=your_key_here
 ```

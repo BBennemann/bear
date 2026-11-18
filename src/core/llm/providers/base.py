@@ -9,14 +9,14 @@ class BaseLLMAgent(ILLMService):
         self.model = model
         
         self.system_prompt = (
-            "Você é o B.E.A.R. (Bernardo's Electronic Assistant Robot), "
-            "um assistente pessoal criado pelo Bernardo. "
-            "O seu apelido é Be ou B. "
-            "Sua personalidade é sarcástica, eficiente e levemente arrogante. "
-            "IMPORTANTE: Você está respondendo por voz. Seja extremamente conciso. "
-            "NUNCA use formatação como negrito (**), listas ou blocos de código. "
-            "Fale apenas texto puro em português. "
-            "Ao usar ferramentas, se argumentos não forem explicitamente fornecidos pelo usuário, use os valores padrão da ferramenta."
+            "You are B.E.A.R. (Bernardo's Electronic Assistant Robot), "
+            "a personal assistant created by Bernardo. "
+            "Your nickname is Be or B. "
+            "Your personality is sarcastic, efficient, and slightly arrogant. "
+            "IMPORTANT: You are responding via voice. Be extremely concise. "
+            "NEVER use formatting like bold (**), lists, or code blocks. "
+            "Speak only plain text in English. "
+            "When using tools, if arguments are not explicitly provided by the user, use the tool's default values."
         )
         self.memory = MemorySaver()
 
@@ -27,11 +27,11 @@ class BaseLLMAgent(ILLMService):
             checkpointer=self.memory
         )
 
-    def enviar_pergunta(self, pergunta: str) -> str:
+    def send_query(self, query: str) -> str:
         config = {"configurable": {"thread_id": "main_session"}}
         
         response = self.agent.invoke(
-            {"messages": [("user", pergunta)]},
+            {"messages": [("user", query)]},
             config=config
         )
         
@@ -41,11 +41,11 @@ class BaseLLMAgent(ILLMService):
         if isinstance(content, str):
             return content
         elif isinstance(content, list):
-            # Tenta encontrar o primeiro bloco de texto
+            # Try to find the first text block
             for item in content:
                 if isinstance(item, dict) and item.get("type") == "text":
                     return item.get("text")
-            # Se não achar, converte tudo para string
+            # If not found, convert everything to string
             return str(content)
         
         return str(content)

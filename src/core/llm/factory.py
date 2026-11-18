@@ -11,5 +11,4 @@ class LLMFactory:
         elif provider == "groq":
             return GroqService()
         else:
-            raise ValueError(f"Provider {provider} não suportado")
-    
+            raise ValueError(f"Provider {provider} not supported")

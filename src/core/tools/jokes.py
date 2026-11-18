@@ -2,19 +2,22 @@ from langchain_core.tools import tool
 import random
 
 @tool
-def piada() -> str:
+def joke() -> dict:
     """
-    Retorna uma piada aleatória.
+    Fetches and returns a short, random joke.
+    
+    Use this tool when the user asks to tell a joke, something funny, or to brighten their day. The joke is returned in English.
+
+    Args:
+        None.
 
     Returns:
-        str: A piada aleatória.
+        dict: A dictionary containing the key "joke" with the joke text.
     """
 
     jokes_list = [
-        "Por que os fantasmas são péssimos para contar mentiras?... Porque são transparentes.",
-        "Por que a plantinha não foi atendida no hospital?... Porque só tinha médico de plantão."
+        "Why don't skeletons fight each other?... They don't have the guts.",
+        "What do you call a fake noodle?... An impasta.",
+        "Why did the scarecrow win an award?... Because he was outstanding in his field."
     ]
-    return {"joke":random.choice(jokes_list)}
-
-
-    
+    return {"joke": random.choice(jokes_list)}

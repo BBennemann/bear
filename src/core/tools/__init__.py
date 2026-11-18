@@ -1,6 +1,6 @@
-from .jokes import piada
-from .news import gnews
+from .jokes import joke
+from .news import get_news
 from .money_exchange import exchange_rates
-from .weather import weather_data
+from .weather import get_weather_data
 
-TOOLS = [piada, gnews, exchange_rates, weather_data]
+TOOLS = [joke, get_news, exchange_rates, get_weather_data]

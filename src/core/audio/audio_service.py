@@ -6,7 +6,6 @@ import subprocess
 import shutil
 from config.config import config
 
-
 class AudioService():
 
     def __init__(self):
@@ -15,62 +14,63 @@ class AudioService():
 
         self._config_recognizer()
 
-        self.voice = 'pt-BR-AntonioNeural'
+        # Changed to English voice
+        self.voice = 'en-US-AriaNeural'
 
-        self._verificar_dependencias()
+        self._check_dependencies()
 
-    def _verificar_dependencias(self):
+    def _check_dependencies(self):
         self.mpv_path = shutil.which("mpv")
         if not self.mpv_path:
-            raise RuntimeError("MPV player não encontrado. Instale com 'sudo apt install mpv'")
+            raise RuntimeError("MPV player not found. Install it with 'sudo apt install mpv'")
 
     def _config_recognizer(self):
         self.recognizer.energy_threshold = 300
         self.recognizer.pause_threshold = 1.0
         self.recognizer.dynamic_energy_threshold = True
 
-    def gravar_audio(self):
+    def record_audio(self):
         with sr.Microphone() as source:
-            print("\n--- A escutar... (Fala agora) ---")
+            print("\n--- Listening... (Speak now) ---")
             
-            # Ajusta o ruído de fundo (apenas 0.2s para ser rápido)
+            # Adjusts for background noise (only 0.4s to be fast)
             self.recognizer.adjust_for_ambient_noise(source, duration=0.4)
             
             try:
-                # 1. Captura o áudio (com limite de tempo para não travar)
-                # timeout=5: Espera até 5s para você começar a falar
-                # phrase_time_limit=10: Corta se você falar por mais de 10s
+                # 1. Capture audio (with timeout to avoid freezing)
+                # timeout=5: Waits up to 5s for you to start speaking
+                # phrase_time_limit=30: Cuts off if you speak for more than 30s
                 audio = self.recognizer.listen(source, timeout=5, phrase_time_limit=30)
                 audio_data = audio.get_wav_data()
-                arquivo_memoria = ("audio.wav", audio_data)
+                memory_file = ("audio.wav", audio_data)
 
-                return arquivo_memoria
+                return memory_file
 
             except sr.WaitTimeoutError:
-                print("Não detetei fala (tempo esgotado).")
+                print("No speech detected (timeout).")
             except sr.UnknownValueError:
-                print("Não foi possível entender o áudio.")
+                print("Could not understand the audio.")
             except Exception as e:
-                print(f"Erro: {e}")
+                print(f"Error: {e}")
 
-    def transcrever(self, arquivo: tuple[str, Any]):
+    def transcribe(self, file: tuple[str, Any]):
         return self.client.audio.transcriptions.create(
-                    file=arquivo,
-                    model="whisper-large-v3", # O modelo mais preciso
-                    prompt="O áudio é em português.", # Contexto opcional ajuda na precisão
+                    file=file,
+                    model="whisper-large-v3", # The most accurate model
+                    prompt="The audio is in English.", # Optional context helps with accuracy
                     response_format="text",
-                    language="pt" # Força o português
+                    language="en" # Force English
                 )
 
-    async def tocar_audio(self, texto: str):
+    async def play_audio(self, text: str):
         
-        tts = et.Communicate(texto, self.voice)
+        tts = et.Communicate(text, self.voice)
         
-        # Inicia o mpv esperando dados pelo stdin
+        # Starts mpv expecting data via stdin
         cmd = [self.mpv_path, "--no-cache", "--no-terminal", "--", "-"]
         
         try:
-            processo = subprocess.Popen(
+            process = subprocess.Popen(
                 cmd,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.DEVNULL,
@@ -79,12 +79,12 @@ class AudioService():
             
             async for chunk in tts.stream():
                 if chunk["type"] == "audio":
-                    processo.stdin.write(chunk["data"])
-                    processo.stdin.flush()
+                    process.stdin.write(chunk["data"])
+                    process.stdin.flush()
             
-            if processo.stdin:
-                processo.stdin.close()
-            processo.wait()
+            if process.stdin:
+                process.stdin.close()
+            process.wait()
                 
         except Exception as e:
-            print(f"Erro no stream de áudio: {e}")
+            print(f"Error in audio stream: {e}")

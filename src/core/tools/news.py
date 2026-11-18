@@ -10,33 +10,20 @@ from src.config.config import config
 from langchain_core.tools import tool
 
 @tool
-def gnews(category: str = "general", lang: str = "en", country: str = "ie", max: Optional[int] = 3) -> str:
+def get_news(category: str = "general", lang: str = "en", country: str = "us", max: Optional[int] = 3) -> dict:
     """
-    Busca as principais manchetes de notícias através da API do GNews.
-
-    Esta ferramenta filtra notícias com base em categorias específicas, idioma e 
-    país de origem, retornando uma lista simplificada de títulos e descrições.
+    Fetches top news headlines using the GNews API.
+    
+    Use this tool when the user asks for today's news, latest updates on a general topic, or what's happening in the world or country.
 
     Args:
-        category (str): Categoria das notícias. Opções disponíveis: 'general', 'world', 
-            'nation', 'business', 'technology', 'entertainment', 'sports', 'science' 
-            e 'health'. Valor padrão: "technology".
-        lang (str): Idioma dos artigos no formato ISO 639-1 (2 letras).
-            Deve sempre corresponder à língua principal do país da notícia.
-            Assuma automaticamente qual é a lingua
-            Ex: 'pt', 'en', 'es'. Valor padrão: "pt".
-        country (str): Código do país no formato ISO 3166-1 alpha-2 (2 letras). 
-            Define a origem ou relevância geográfica das notícias. Valor padrão: "br".
-        max (optional, int): Número máximo de artigos a serem retornados. Aceita valores 
-            entre 1 e 100 (sujeito aos limites do plano da API). Valor padrão: 3.
+        category (str): News category. Options: 'general', 'world', 'nation', 'business', 'technology', 'entertainment', 'sports', 'science', 'health'. Default: "technology".
+        lang (str): Language of the articles (ISO 639-1, 2 letters). Ex: 'en', 'es', 'pt'. Try to guess from the user's request. Default: "en".
+        country (str): Country (ISO 3166-1 alpha-2, 2 letters). Ex: 'us', 'gb', 'br'. Default: "us".
+        max (int, optional): Maximum number of articles to return. Default: 3.
 
     Returns:
-        dict: Um dicionário contendo a chave "articles", que armazena uma lista de 
-            objetos com o título ('title') e a descrição ('description') de cada notícia.
-
-    Example:
-        gnews(category="business", max=3)
-        {'articles': [{'title': 'Exemplo de Título', 'description': 'Descrição da notícia.'}]}
+        dict: A dictionary containing the list of news articles (title and description).
     """
     gnews_base_url = "https://gnews.io/api/v4/top-headlines?"
 
@@ -53,17 +40,17 @@ def gnews(category: str = "general", lang: str = "en", country: str = "ie", max:
 
     response = requests.get(gnews_base_url)
 
-    artigos = response.json().get("articles", [])
+    articles = response.json().get("articles", [])
     
-    conteudo_limpo = [
+    clean_content = [
         {
             "title": art.get("title", ""),
             "description": art.get("description", "")
         }
-        for art in artigos
+        for art in articles
     ]
     
-    return {"articles": conteudo_limpo}
+    return {"articles": clean_content}
 
 if __name__ == "__main__":
-    print(gnews.invoke({}))
+    print(get_news.invoke({}))

@@ -9,52 +9,51 @@ from config.config import config
 from pathlib import Path
 
 async def main(llm_service, audio_service):
-    RATE = 16000
+    RATE: int = 16000
     CHANNELS = 1
     FRAMES = 1280
 
-    current_dir = Path(__file__).parent # Pega o caminho do arquivo atual
-    model_path = str(current_dir / 'models' / 'Hey_Jarvis.onnx') # Constrói o caminho absoluto
+    current_dir = Path(__file__).parent # Get current file path
+    model_path = str(current_dir / 'models' / 'Hey_Jarvis.onnx') # Build absolute path
 
     model = Model(wakeword_model_paths=[model_path])
     audio = pyaudio.PyAudio()
 
-    print("Bear está ouvindo...")
+    print("Bear is listening...")
 
     try:
         while True:
-            # Cria o gravador apenas para esse ciclo de "espera"
+            # Create the stream only for this "waiting" cycle
             stream = audio.open(rate=RATE, channels=CHANNELS, format=pyaudio.paInt16, input=True, frames_per_buffer=FRAMES)
+            model.reset()
 
-            # Loop de detecção da Wake Word
+            # Wake Word detection loop
             while True:
 
                 array = np.frombuffer(stream.read(FRAMES), dtype=np.int16)
                 wake_word = model.predict(array)
                 
                 if wake_word['Hey_Jarvis'] >= 0.5:
-                    print("Bear acordou!")
+                    print("Bear woke up!")
                     model.reset()
                     stream.stop_stream()
                     stream.close()
-                    break # Sai do loop de espera
+                    break # Exit waiting loop
             
-            # Libera o microfone COMPLETAMENTE para o outro processo usar
-
-            # --- Lógica de Comando ---
-            gravado = audio_service.gravar_audio()
+            # --- Command Logic ---
+            recorded_audio = audio_service.record_audio()
             
-            if gravado:
-                texto = audio_service.transcrever(gravado)
-                print("--- Transcrito: ---", texto)
-                if texto:
-                    resposta = llm_service.enviar_pergunta(texto)
-                    await audio_service.tocar_audio(resposta)
+            if recorded_audio:
+                transcribed_text = audio_service.transcribe(recorded_audio)
+                print("--- Transcribed: ---", transcribed_text)
+                if transcribed_text:
+                    response = llm_service.send_query(transcribed_text)
+                    await audio_service.play_audio(response)
             
-            # O loop reinicia e recria o recorder lá em cima
+            # The loop restarts and recreates the stream above
             
     except Exception as e:
-        print(f"Erro: {e}")
+        print(f"Error: {e}")
     finally:
         audio.terminate()
 

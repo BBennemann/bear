@@ -9,16 +9,18 @@ from src.config.config import config
 from langchain_core.tools import tool
 
 @tool
-def weather_data(city_name: str = "florianopolis", days: int = 2):
+def get_weather_data(city_name: str = "New York", days: int = 2):
     """
-    Obtém a previsão do tempo para uma cidade.
+    Gets the current and future weather forecast for a specific city.
+    
+    Use this tool when the user asks about temperature, rain, or what the weather will be like today or tomorrow in a given city.
 
     Args:
-        city_name (str): Nome da cidade. Valor padrão: "florianopolis".
-        days (int): Número de dias para a previsão.
-            1 = Previsão de hoje.
-            2 = Previsão de hoje e amanhã.
-            Valor máximo: 2. Valor padrão: 2.
+        city_name (str): Name of the city or location (e.g., "New York", "London", "Tokyo"). Default: "New York".
+        days (int): Number of days for the forecast (1 for today only, 2 for today and tomorrow). Maximum of 2. Default: 2.
+
+    Returns:
+        dict: Dictionary containing city, region, country, and a list of data for each day (date, max/min temperature, chance of rain, and weather condition).
     """
     weather_base_url = f"http://api.weatherapi.com/v1/forecast.json"
 
@@ -32,25 +34,23 @@ def weather_data(city_name: str = "florianopolis", days: int = 2):
 
     response = requests.get(weather_base_url, params)
 
-    response = {
+    response_data = {
         "city_name": response.json().get("location").get("name"),
         "region_name": response.json().get("location").get("region"),
         "country_name": response.json().get("location").get("country"),
-        "previsao": [
+        "forecast": [
             {
-                "dia": day.get("date"),
+                "day": day.get("date"),
                 "temp_max": day.get("day").get("maxtemp_c"),
                 "temp_min": day.get("day").get("mintemp_c"),
                 "chance_of_rain": day.get("day").get("daily_chance_of_rain"),
-                "condicao": day.get("day").get("condition").get("text")
+                "condition": day.get("day").get("condition").get("text")
             }
             for day in response.json().get("forecast").get("forecastday")
         ]
     }
 
-    return response
-
+    return response_data
 
 if __name__ == "__main__":
-    print(weather_data.invoke({}))
-    
+    print(get_weather_data.invoke({}))
