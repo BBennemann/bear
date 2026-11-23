@@ -1,11 +1,6 @@
-import json
 import requests
-import sys
-import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-
-from src.config.config import config
+from bear.config import config
 from langchain_core.tools import tool
 
 @tool
@@ -32,23 +27,30 @@ def get_weather_data(city_name: str = "New York", days: int = 2):
         "days": days
     }
 
-    response = requests.get(weather_base_url, params)
+    try:
+        response = requests.get(weather_base_url, params, timeout=10)
+        response.raise_for_status()
 
-    response_data = {
-        "city_name": response.json().get("location").get("name"),
-        "region_name": response.json().get("location").get("region"),
-        "country_name": response.json().get("location").get("country"),
-        "forecast": [
-            {
-                "day": day.get("date"),
-                "temp_max": day.get("day").get("maxtemp_c"),
-                "temp_min": day.get("day").get("mintemp_c"),
-                "chance_of_rain": day.get("day").get("daily_chance_of_rain"),
-                "condition": day.get("day").get("condition").get("text")
-            }
-            for day in response.json().get("forecast").get("forecastday")
-        ]
-    }
+        data = response.json()
+
+        response_data = {
+            "city_name": data.get("location").get("name"),
+            "region_name": data.get("location").get("region"),
+            "country_name": data.get("location").get("country"),
+            "forecast": [
+                {
+                    "day": day.get("date"),
+                    "temp_max": day.get("day").get("maxtemp_c"),
+                    "temp_min": day.get("day").get("mintemp_c"),
+                    "chance_of_rain": day.get("day").get("daily_chance_of_rain"),
+                    "condition": day.get("day").get("condition").get("text")
+                }
+                for day in data.get("forecast").get("forecastday")
+            ]
+        }
+    except requests.RequestException as e:
+        return {"error": f"Failed to fetch data from weather API: {e}"}
+
 
     return response_data
 

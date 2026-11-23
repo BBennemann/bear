@@ -1,4 +1,4 @@
-from config.config import config
+from bear.config import config
 from .base import BaseLLMAgent 
 from langchain_openai import ChatOpenAI
 

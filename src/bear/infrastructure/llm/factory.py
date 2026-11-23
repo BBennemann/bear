@@ -1,4 +1,4 @@
-from .interface import ILLMService
+from bear.domain.interfaces.llm_service import ILLMService
 from .providers import GeminiService, GPTService, GroqService
 
 class LLMFactory:

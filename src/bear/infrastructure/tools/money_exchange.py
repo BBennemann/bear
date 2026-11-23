@@ -1,12 +1,7 @@
-import json
 import requests
-import sys
-import os
 from typing import Optional
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-
-from src.config.config import config
+from bear.config import config
 from langchain_core.tools import tool
 
 @tool
@@ -29,14 +24,18 @@ def exchange_rates(base_coin: str = "EUR", target_coin: str = "BRL", amount: Opt
     if amount:
         exchange_rates_url += f"/{amount}"
 
-    response = requests.get(exchange_rates_url)
+    try: 
+        response = requests.get(exchange_rates_url, timeout=10)
+        response.raise_for_status()
 
-    response_data = {
-        "base_code": response.json().get("base_code"),
-        "target_code": response.json().get("target_code"),
-        "conversion_rate": response.json().get("conversion_rate"),
-        "amount": response.json().get("conversion_result")
-    }
+        response_data = {
+            "base_code": response.json().get("base_code"),
+            "target_code": response.json().get("target_code"),
+            "conversion_rate": response.json().get("conversion_rate"),
+            "amount": response.json().get("conversion_result")
+        }
+    except requests.RequestException as e:
+        return {"error": f"Failed to fetch money exchange API: {e}"}
 
     return {"response": response_data}
 

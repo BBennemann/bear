@@ -1,12 +1,7 @@
-import json
 import requests
-import sys
-import os
 from typing import Optional
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-
-from src.config.config import config
+from bear.config import config
 from langchain_core.tools import tool
 
 @tool
@@ -35,20 +30,21 @@ def get_news(category: str = "general", lang: str = "en", country: str = "us", m
         "apikey": config.GNEWS_API_KEY
     }
 
-    for k, v in params.items():
-        gnews_base_url += f"{k}={v}&"
+    try:
+        response = requests.get(gnews_base_url, params=params, timeout=10)
+        response.raise_for_status()
 
-    response = requests.get(gnews_base_url)
-
-    articles = response.json().get("articles", [])
-    
-    clean_content = [
-        {
-            "title": art.get("title", ""),
-            "description": art.get("description", "")
-        }
-        for art in articles
-    ]
+        articles = response.json().get("articles", [])
+        
+        clean_content = [
+            {
+                "title": art.get("title", ""),
+                "description": art.get("description", "")
+            }
+            for art in articles
+        ]
+    except requests.RequestException as e:
+        return {"error": f"Failed to fetch news data API: {e}"}
     
     return {"articles": clean_content}
 

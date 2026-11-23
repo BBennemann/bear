@@ -1,7 +1,8 @@
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
-from core.tools import TOOLS
-from ..interface import ILLMService
+from bear.infrastructure.tools import TOOLS
+from bear.domain.exceptions import LLMProviderError
+from bear.domain.interfaces.llm_service import ILLMService
 
 class BaseLLMAgent(ILLMService):
 
@@ -29,11 +30,14 @@ class BaseLLMAgent(ILLMService):
 
     def send_query(self, query: str) -> str:
         config = {"configurable": {"thread_id": "main_session"}}
-        
-        response = self.agent.invoke(
-            {"messages": [("user", query)]},
-            config=config
-        )
+
+        try:
+            response = self.agent.invoke(
+                {"messages": [("user", query)]},
+                config=config
+            )
+        except Exception as e:
+            raise LLMProviderError(f"LLM query failed: {e}") from e
         
         last_message = response["messages"][-1]
         content = last_message.content
