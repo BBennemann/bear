@@ -18,6 +18,7 @@ dependencies = [
     "pydantic-settings>=2.16.3",
     "requests>=2.34.2",
     "speechrecognition>=3.17.0",
+    "spotipy>=2.26.0",
 ]
 
 [build-system]
