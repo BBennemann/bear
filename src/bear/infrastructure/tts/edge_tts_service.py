@@ -7,9 +7,9 @@ from bear.domain.exceptions import SpeechSynthesisError
 
 class EdgeMpvTTS(ITTSService):
 
-    def __init__(self):
+    def __init__(self, voice: str):
         # Changed to English voice
-        self.voice = 'en-US-AriaNeural'
+        self.voice = voice
 
         self._check_dependencies()
 
