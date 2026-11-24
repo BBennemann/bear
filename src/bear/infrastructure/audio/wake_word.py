@@ -19,10 +19,15 @@ class OpenWakeWordDetector(IWakeWord):
         self.model = Model(wakeword_model_paths=[str(model_path)])
         self.threshold = threshold
 
+    def _reset_model(self):
+        silence = np.zeros(self.RATE * 2, dtype=np.int16)
+        self.model.preprocessor(silence)
+        self.model.reset()
+
     def listen_wake_word(self) -> None:
         # Create the stream only for this "waiting" cycle
         stream = self.audio.open(rate=self.RATE, channels=self.CHANNELS, format=pyaudio.paInt16, input=True, frames_per_buffer=self.FRAMES)
-        self.model.reset()
+        self._reset_model()
 
         # Wake Word detection loop
         try:
@@ -39,7 +44,7 @@ class OpenWakeWordDetector(IWakeWord):
             raise WakeWordError(f"Wake word detection failed: {e}")
         
         finally:
-            self.model.reset()
+            self._reset_model()
             stream.stop_stream()
             stream.close()
 
