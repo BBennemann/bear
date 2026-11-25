@@ -34,6 +34,7 @@ class Config(BaseSettings):
     SPOTIPY_CLIENT_ID: str
     SPOTIPY_CLIENT_SECRET: str
     SPOTIPY_REDIRECT_URI: str = "http://127.0.0.1:8888/callback"
+    FAVORITE_DEVICE: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

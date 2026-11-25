@@ -54,7 +54,7 @@ class SpotifyService():
     
         return {"response": music}
     
-spotify_service = SpotifyService(config.SPOTIPY_CLIENT_ID, config.SPOTIPY_CLIENT_SECRET, config.SPOTIPY_REDIRECT_URI)
+spotify_service = SpotifyService(config.SPOTIPY_CLIENT_ID, config.SPOTIPY_CLIENT_SECRET, config.SPOTIPY_REDIRECT_URI, config.FAVORITE_DEVICE)
 
 @tool
 def play_music(music_name: str) -> dict:
