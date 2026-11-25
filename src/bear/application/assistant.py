@@ -1,3 +1,5 @@
+import asyncio
+
 from bear.domain.exceptions import BearError
 
 from bear.domain.interfaces.audio_recorder import IAudioRecorder
@@ -21,11 +23,13 @@ class BearOrchestrator():
         print("Bear is listening...")
         
         try:
+            already_awake = False
             while True:
 
                 try:
-                    self.wake_word_detector.listen_wake_word()
-                    
+                    if not already_awake:
+                        self.wake_word_detector.listen_wake_word()
+                    already_awake = False
                     # --- Command Logic ---
                     recorded_audio = self.recorder.record_audio()
                     
@@ -34,7 +38,16 @@ class BearOrchestrator():
                         print("--- Transcribed: ---", transcribed_text)
                         if transcribed_text:
                             response = self.llm_service.send_query(transcribed_text)
-                            await self.tts.speak(response)
+                            speak_task = asyncio.create_task(self.tts.speak(response))
+                            wake_task = asyncio.create_task(asyncio.to_thread(self.wake_word_detector.listen_wake_word))
+                            done, pending = await asyncio.wait([speak_task, wake_task], return_when=asyncio.FIRST_COMPLETED)
+
+                            if wake_task in done:
+                                self.tts.stop()
+                                speak_task.cancel()
+                            elif speak_task in done:
+                                await wake_task
+                            already_awake = True
                 except BearError as e:
                     print(f"Interaction error: {e}")
                 # The loop restarts and recreates the stream above
